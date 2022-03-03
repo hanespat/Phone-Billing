@@ -1,6 +1,10 @@
 package com.phonecompany.billing;
 
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,30 +13,65 @@ import java.util.stream.Collectors;
 
 public class TelephoneBillCalculatorImpl implements TelephoneBillCalculator {
 
-    public record Time (int hour, int minute, int sec) {}
-    public record Date (int day, int month, int year) {}
-    public record TimeStamp (Date date, Time time) {}
-    public record PhoneLog (String phoneNumber, TimeStamp phoneStart, TimeStamp phoneEnd) {}
-
     public static final int YEAR_SECONDS = 31536000;
-    public static final int MONTH_SECONDS = ;
     public static final int DAY_SECONDS = 86400;
 
     public static final int HOUR_SECONDS = 3600;
     public static final int MINUTE_SECONDS = 60;
 
-    public BigInteger getSeconds (TimeStamp phoneStart, TimeStamp phoneEnd) {
-        long years = phoneEnd.date.year - phoneStart.date.year;
-        long months = phoneEnd.date.month - phoneStart.date.month;
-        long days = phoneEnd.date.day - phoneStart.date.day;
 
-        long hours= phoneEnd.time.hour - phoneStart.time.hour;
-        long minutes = phoneEnd.time.minute - phoneStart.time.minute;
-        long seconds = phoneEnd.time.sec - phoneStart.time.sec;
+    public record Time (int hour, int minute, int sec) {}
 
-        long result = years *
+    public record Date (int day, int month, int year) {
+        public String getFormat () {
 
-        return new BigInteger(0);
+            String dayString = String.format("%02d", day);
+            String monthString = String.format("%02d", month);
+            String yearString = String.format("%04d", year);
+
+            return dayString + " " + monthString + " " + yearString;
+        }
+    }
+    public record TimeStamp (Date date, Time time) { }
+    public record PhoneLog (String phoneNumber, TimeStamp phoneStart, TimeStamp phoneEnd) {}
+
+    public long getSecondsFromDates (Date first, Date second) {
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("dd MM yyyy");
+        String inputString1 = first.getFormat();
+        String inputString2 = second.getFormat();
+
+        LocalDate firstDate = LocalDate.parse(inputString1, dateTimeFormat);
+        LocalDate secondDate = LocalDate.parse(inputString2, dateTimeFormat);
+
+        long result = ChronoUnit.DAYS.between(firstDate, secondDate);
+        if (result <= 0)
+            result = 0;
+
+        return result * DAY_SECONDS;
+    }
+
+    public long getSecondsFromTimes (Time first, Time second) {
+
+        long phoneStartSeconds = first.hour * HOUR_SECONDS + first.minute * MINUTE_SECONDS + first.sec;
+        long phoneEndSeconds = second.hour * HOUR_SECONDS + second.minute * MINUTE_SECONDS + second.sec;
+
+        long result = phoneEndSeconds - phoneStartSeconds;
+        if (result <= 0)
+            result = 0;
+
+        return result;
+    }
+
+
+
+    public long getSecondsFromTimestamps (TimeStamp phoneStart, TimeStamp phoneEnd) {
+
+        long dateDifference = getSecondsFromDates(phoneStart.date, phoneEnd.date);
+        long timeDifference = getSecondsFromTimes(phoneStart.time, phoneEnd.time);
+
+        long result = dateDifference + timeDifference;
+
+        return result;
     }
 
 
@@ -96,10 +135,6 @@ public class TelephoneBillCalculatorImpl implements TelephoneBillCalculator {
         return "";
     }
 
-    /**
-     * Get array of phoneNumbers
-     *
-     */
 
     @Override
     public BigDecimal calculate(String phoneLog) {
@@ -110,6 +145,8 @@ public class TelephoneBillCalculatorImpl implements TelephoneBillCalculator {
         for (var phoneCall: phoneCalls) {
             phoneLogs.add(getPhoneLog(phoneCall));
         }
+
+        long result = getSecondsFromTimestamps(phoneLogs.get(0).phoneStart, phoneLogs.get(0).phoneEnd );
 
         return new BigDecimal(0);
     }
