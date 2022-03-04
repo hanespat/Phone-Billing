@@ -50,9 +50,9 @@ public class BillConditions {
         if (leftEdgeDifMS < 0) { // To the left of 08:00:00
             long differenceInSeconds = (Math.abs(leftEdgeDifMS) / 1000) % 60;
             if (differenceInSeconds > seconds)
-                return (differenceInSeconds * 0.50);
+                return (Math.ceil(differenceInSeconds / 60F) * 0.50);
             else
-                return (differenceInSeconds * 0.50) +  (Math.ceil((seconds - differenceInSeconds)/60F) * 1);
+                return (Math.ceil(differenceInSeconds / 60F) * 0.50) +  (Math.ceil((seconds - differenceInSeconds)/60F) * 1);
         }
         else if (rightEdgeDifMS < 0) { // To the left of 15:59:59
             long differenceInSeconds = (Math.abs(rightEdgeDifMS) / 1000) % 60;
