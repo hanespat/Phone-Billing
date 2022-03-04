@@ -1,3 +1,11 @@
-com\phonecompany\Application.class
+com\phonecompany\billing\data\DataParser.class
+com\phonecompany\billing\data\Date.class
 com\phonecompany\billing\TelephoneBillCalculator.class
+com\phonecompany\billing\util\SpecialPhoneNumber.class
+com\phonecompany\billing\util\CalculateSeconds.class
+com\phonecompany\billing\data\TimeStamp.class
+com\phonecompany\billing\util\BillConditions.class
+com\phonecompany\Application.class
+com\phonecompany\billing\data\PhoneLog.class
+com\phonecompany\billing\data\Time.class
 com\phonecompany\billing\TelephoneBillCalculatorImpl.class
